@@ -11,7 +11,20 @@ var express = require('express')
 , io = require('socket.io')(server)
 , cookie = cookieParser(SECRET)
 , store = new expressSession.MemoryStore()
-, mongoose = require('mongoose');
+, mongoose = require('mongoose')
+, knex = require('knex')({
+  client: 'pg',
+  connection: {
+    host     : '127.0.0.1',
+    user     : 'postgres',
+    password : 'ed020893',
+    database : 'rulk',
+    charset  : 'utf8',
+    port : 5433
+  }
+})
+,bookshelf = require('bookshelf')(knex);
+
 
 global.db = mongoose.connect('mongodb://localhost/ntalk');
 
@@ -29,6 +42,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(methodOverride('_method'));
 app.use(express.static(__dirname + '/public'));
+app.set('bookshelf', bookshelf);
 
 io.use(function(socket, next) {
     var data = socket.request;
@@ -44,7 +58,6 @@ io.use(function(socket, next) {
         });
     });
 });
-
 
 load('models').then('controllers').then('routes').into(app);
 load('sockets').into(io);
