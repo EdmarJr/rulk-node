@@ -1,29 +1,19 @@
 module.exports = function(app) {
+
+
     var Usuario = app.models.usuario;
+    var verificarSenhaUsuario = function(model) {
+        req.body.usuario.senhamodel.get('hashsenha');
+    };
+
     var HomeController = {
         index: function(req, res) {
             res.render('home/index');
         },
-        login: function(req, res) {
-            var query = {email: req.body.usuario.email};
-            Usuario.findOne(query)
-            .select('nome email')
-            .exec(function(erro, usuario){
-                if (usuario) {
-                    req.session.usuario = usuario;
-                    res.redirect('/contatos');
-                } else {
-                    var usuario = req.body.usuario;
-                    Usuario.create(usuario, function(erro, usuario){
-                        if(erro){
-                            res.redirect('/');
-                        } else {
-                            req.session.usuario = usuario;
-                            res.redirect('/contatos');
-                        }
-                    });
-                }
-            });
+        login:function(req, res) {
+            req.session.usuario = req.user;
+            req.session.paginasPermitidas = req.user.paginasPermitidas();
+            res.redirect('/users/' + req.user.username);
         },
         logout: function(req, res) {
             req.session.destroy();

@@ -1,14 +1,22 @@
 module.exports = function(app) {
-    var Schema = require('mongoose').Schema;
-    var contato = Schema({
-        nome: String
-        , email: String
+    var crypto = require('crypto');
+    var Usuario = app.get('bookshelf').Model.extend({
+        tableName: 'usuario',
+        idAttribute: 'email',
+        isValidPassword: function(password) {
+            var sha256 = crypto.createHash("sha256");
+            sha256.update(password, "utf8");
+            var result = sha256.digest("base64");
+            if(result == this.get('hashsenha')) {
+                return true;
+            }
+            return false;
+        },
+        paginasPermitidas: function() {
+            var teste = this.hasMany(app.models.paginasPermitidas);
+            console.log(teste);
+            return teste;
+        }
     });
-    var usuario = Schema({
-        nome: {type: String, required: true}
-        , email: {type: String, required: true
-                  , index: {unique: true}}
-        , contatos: [contato]
-    });
-    return db.model('usuarios', usuario);
+    return Usuario;
 };
